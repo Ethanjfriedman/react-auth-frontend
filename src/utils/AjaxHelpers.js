@@ -1,8 +1,8 @@
 const domain = process.env.AUTH_TEST_BACKEND || "http://localhost:3333"
 
 export default {
-  post(URL, body) {
-    return fetch(URL,{
+  request(URL, method, body = "") {
+    return fetch(URL, {
       method: 'POST',
       headers: new Headers({
         'Content-Type': 'application/json',
@@ -20,7 +20,7 @@ export default {
       password
     });
 
-    return this.post(URL, user); 
+    return this.request(URL, 'POST', user);
   },
 
   createNewUser(username, password) {
@@ -30,13 +30,18 @@ export default {
       password
     });
 
-    return fetch(URL, {
-      method: 'POST',
-      body: newUser
-    });
+    return this.request(URL, 'POST', newUser);
   },
 
-  getAllUsers(token) {
-    //TODO
+  getAllUsers() {
+    const URL = domain + '/users/all';
+    const token = JSON.stringify({
+      token: localStorage.getItem('token')
+    });
+    if (!token.token) {
+      throw new Error('whoops') //TODO FIXME obviously
+    } else {
+      return this.request(URL, 'GET', token);
+    }
   }
 }

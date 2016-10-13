@@ -6,6 +6,7 @@ export default class UserForm extends Component {
   render() {
     const content = this.props.loggedIn ?
       <Logout token={this.props.token}
+              onLogout={this.props.handleLogout}
               username={this.props.username} /> :
       <Login failedLogIns={this.props.failedLogIns}
              onLogin={this.props.handleLogin}
@@ -30,7 +31,8 @@ UserForm.defaultProps = {
 UserForm.PropTypes = {
   failedLogIns: React.PropTypes.num,
   loggedIn: React.PropTypes.bool.isRequired,
-  login: React.PropTypes.func.isRequired,
+  handleLogin: React.PropTypes.func.isRequired,
+  handleLogout: React.PropTypes.func.isRequired,
   handleUpdateState: React.PropTypes.func.isRequired,
   username: React.PropTypes.string,
   token: React.PropTypes.string
