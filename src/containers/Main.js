@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import UserForm from '../components/UserForm';
-import AjaxHelpers from '../utils/AjaxHelpers';
-import { updateState, logout } from '../utils/UserFxns';
+import { login, createNewUser, getAllUsers } from '../utils/AjaxHelpers';
 
 export default class Main extends Component {
   constructor(props) {
@@ -21,11 +20,12 @@ export default class Main extends Component {
     };
 
     this.bind([
-      // 'updateState',
+      'updateState',
       'login',
       'logout',
       'currentlyLoggedIn',
-      'handleUpdateState'
+      'updateState',
+      'register'
     ]);
   }
 
@@ -35,69 +35,82 @@ export default class Main extends Component {
     });
   }
 
-  handleUpdateState() {
-    return updateState.bind(this);
+  updateState(key, val) {
+    // const priorState = Object.assign({}, this.state);
+    // so we can revert if necessary
+    this.setState({
+      [key]: val
+    });
   }
-
-  handleLogout() {
-    return logout.bind(this);
-  }
-
-  // updateState(key, val) {
-  //   // const oldState = Object.assign({}, this.state);
-  //   // so we can revert if necessary
-  //   this.setState({
-  //     [key]: val
-  //   });
-  // }
 
   login(e) {
     e.preventDefault();
     if (this.currentlyLoggedIn()) {
-      //const oldState = Object.assign({}, this.state);
+      //const priorState = Object.assign({}, this.state);
       this.setState({
         statusMessage: `You're currently logged in as ${this.state.username}. Please log out if you wish to log in as a different user.`
       });
     } else {
-      AjaxHelpers.login(this.state.username, this.state.password)
-        .then(response => {
-          return response.json();
-        }).then(json => {
-          console.log(json);
-          if (json.token !== null && !json.error) {
-            // const oldState = Object.assign({}, this.state);
-            this.setState({
-              token: json.token,
-              loggedIn: true,
-              statusMessage: `Congrats ${this.state.username}! You are logged in.`
-            });
-            localStorage.setItem("react_auth_token", json.token);
-            localStorage.setItem('react_auth_uid', this.state.username);
-          } else {
-            // const oldState = Object.assign({}, this.state);
-            this.setState({
-              loggedIn: false,
-              statusMessage: json.error
-            })
-          }
+      if (this.state.username && this.state.password) {
+        login(this.state.username, this.state.password)
+          .then(response => {
+            return response.json();
+          }).then(json => {
+            if (json.token !== null && !json.error) {
+              // const priorState = Object.assign({}, this.state);
+              this.setState({
+                token: json.token,
+                loggedIn: true,
+                statusMessage: `Congrats ${this.state.username}! You are logged in.`
+              });
+              localStorage.setItem("react_auth_token", json.token);
+              localStorage.setItem('react_auth_uid', this.state.username);
+            } else {
+              // const priorState = Object.assign({}, this.state);
+              const failedLogIns = ++this.state.failedLogIns;
+              this.setState({
+                loggedIn: false,
+                statusMessage: json.error,
+                failedLogIns
+              });
+            }
+          });
+      } else {
+        // const priorState = Object.assign({}, this.state);
+        const failedLogIns = ++this.state.failedLogIns
+        this.setState({
+          statusMessage: "Please provide both a username and a password to log in.",
+          failedLogIns,
+          loggedIn: false
         });
+      }
+    }
+  }
+
+  register(e) {
+    e.preventDefault();
+    if (!this.currentlyLoggedIn()) {
+
     }
   }
 
   logout(e) {
     e.preventDefault();
     if (this.currentlyLoggedIn()) {
-      // const oldState = Object.assign({}, this.state);
+      const priorState = Object.assign({}, this.state);
       this.setState({
         token: "",
-        loggedIn: false
+        loggedIn: false,
+        username: "",
+        statusMessage: `${priorState.username}, you have logged out of the app.`
       });
-      localStorage.removeItem("token");
+      localStorage.removeItem("react_auth_token");
+      localStorage.removeItem("react_auth_uid");
     }
   }
 
   currentlyLoggedIn() {
-    return (this.state.loggedIn && localStorage.getItem('react_auth_token'))
+    return (this.state.loggedIn || localStorage.getItem('react_auth_token'))
   }
 
   render() {
@@ -106,9 +119,9 @@ export default class Main extends Component {
       <div>
         <UserForm loggedIn={this.state.loggedIn}
                   token={this.state.token}
-                  handleUpdateState={this.handleUpdateState}
+                  handleUpdateState={this.updateState}
                   handleLogin={this.login}
-                  handleLogout={this.handleLogout}
+                  handleLogout={this.logout}
                   statusMessage={this.state.statusMessage}
                   username={this.state.username}
                   failedLogIns={this.state.failedLogIns} />

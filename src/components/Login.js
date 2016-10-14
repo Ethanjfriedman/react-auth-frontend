@@ -11,7 +11,7 @@ class Login extends Component {
                 onChange={e => this.props.onUpdateState('username', e.target.value)}
                 placeholder="(Username)">
         </input>
-        <input type="text"
+        <input type="password"
                onChange={e => this.props.onUpdateState('password', e.target.value)}
                placeholder="(Password)">
         </input>
