@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import UserForm from '../components/UserForm';
-import { login, createNewUser, getAllUsers } from '../utils/AjaxHelpers';
+import { login, createNewUser } from '../utils/AjaxHelpers';
 
 export default class Main extends Component {
   constructor(props) {
@@ -89,8 +89,30 @@ export default class Main extends Component {
 
   register(e) {
     e.preventDefault();
-    if (!this.currentlyLoggedIn()) {
-
+    if (!this.currentlyLoggedIn() && this.state.username && this.state.password) {
+      createNewUser(this.state.username, this.state.password)
+        .then(response => {
+          return response.json();
+        })
+        .then(json => {
+          console.log(json);
+          if (json.token !== null && !json.error) {
+            // const priorState = Object.assign({}, this.state);
+            this.setState({
+              token: json.token,
+              loggedIn: true,
+              statusMessage: `Congrats ${this.state.username}! Your account has been created. You are logged in to the app.`
+            });
+          } else {
+            const priorState = Object.assign({}, this.state);
+            const failedLogIns = ++priorState.failedLogIns;
+            this.setState({
+              loggedIn: false,
+              failedLogIns,
+              statusMessage: "Error creating new account."
+            });
+          }
+        });
     }
   }
 
@@ -121,6 +143,7 @@ export default class Main extends Component {
                   token={this.state.token}
                   handleUpdateState={this.updateState}
                   handleLogin={this.login}
+                  handleRegister={this.register}
                   handleLogout={this.logout}
                   statusMessage={this.state.statusMessage}
                   username={this.state.username}

@@ -10,6 +10,7 @@ export default class UserForm extends Component {
               username={this.props.username} /> :
       <Login failedLogIns={this.props.failedLogIns}
              onLogin={this.props.handleLogin}
+             onRegister={this.props.handleRegister}
              onUpdateState={this.props.handleUpdateState} />;
 
     return (

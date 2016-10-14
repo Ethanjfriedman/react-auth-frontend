@@ -24,7 +24,9 @@ const createNewUser = (username, password) => {
   const URL = domain + '/users/new';
   const newUser = JSON.stringify({
     username,
-    password
+    password,
+    isTeacher: true,
+    isAdmin: false
   });
 
   return request(URL, 'POST', newUser);
