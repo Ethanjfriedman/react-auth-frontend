@@ -1,4 +1,4 @@
-const domain = process.env.NODE_ENV === "production" ? 'https://test-authentication-backend.herokuapp.com/' : 'http://localhost:3333';
+const domain = process.env.NODE_ENV === "production" ? 'https://test-authentication-backend.herokuapp.com' : 'http://localhost:3333';
 
 const request = (URL, method, body = "") => {
   return fetch(URL, {
